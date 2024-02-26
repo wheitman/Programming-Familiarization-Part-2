@@ -40,12 +40,11 @@
   <!--   <run_depend>message_runtime</run_depend> -->
   <!-- Use test_depend for packages you need only for testing: -->
   <!--   <test_depend>gtest</test_depend> -->
-  <buildtool_depend>ament_cmake_auto</buildtool_depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
 
   <build_depend>rosidl_default_generators</build_depend>
 
 
-  <build_depend>roscpp</build_depend>
   <build_depend>std_msgs</build_depend>
   <build_depend>mrsd_msgs</build_depend>
   <!-- <build_depend>message_generation</build_depend> -->
