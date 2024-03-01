@@ -32,16 +32,18 @@
 
 from __future__ import division
 import os
-import rospkg
+from ament_index_python.packages import get_package_share_directory
 import threading
+import re
 
 import rclpy
+from mrsd_msgs.msg import ReplyMsg, SentMsg
+from mrsd_msgs.srv import Counter
 from python_qt_binding import loadUi
 from python_qt_binding.QtCore import Qt, QTimer, Slot
 from python_qt_binding.QtGui import QKeySequence
 from python_qt_binding.QtWidgets import QShortcut, QWidget
 from rqt_gui_py.plugin import Plugin
-from mrsd_msgs.msg import ReplyMsg, SentMsg
 
 # from arithmetic_node.msg import arithmetic_reply
 from std_msgs.msg import Int16
@@ -89,15 +91,15 @@ class MessageUI(Plugin):
         self.node.create_subscription(
             ReplyMsg, "reply_msg", self.reply_msg_callback, 10
         )
-
-        # rospy.Subscriber("arithmetic_reply", arithmetic_reply, self.arithmetic_reply_msg_callback)
+        self.counter_client = self.node.create_client(Counter, "message_counter")
 
         self.msg_to_send = SentMsg()
         self.counter_req_id = -1
 
         self._widget = QWidget()
-        rp = rospkg.RosPack()
-        ui_file = os.path.join(rp.get_path("message_ui"), "resource", "MessageUI.ui")
+        ui_file = os.path.join(
+            get_package_share_directory("message_ui"), "resource", "MessageUI.ui"
+        )
         loadUi(ui_file, self._widget)
         self._widget.setObjectName("MessageGUIui")
         if context.serial_number() > 1:
@@ -110,10 +112,10 @@ class MessageUI(Plugin):
         self._widget.counter_val_to_get.textChanged.connect(
             self._on_counter_val_to_get_changed
         )
-        self._widget.counter_val_to_get.setInputMask("9")
+        # self._widget.counter_val_to_get.setInputMask("9")
 
         self._widget.send_message.pressed.connect(self._on_send_message_pressed)
-        # self._widget.send_request.pressed.connect(self._on_send_request_pressed)
+        self._widget.send_request.pressed.connect(self._on_send_request_pressed)
         self.spin_node()
 
     def spin_node(self):
@@ -129,21 +131,26 @@ class MessageUI(Plugin):
         self.msg_to_send.header.stamp = self.node.get_clock().now().to_msg()
         self.message_pub.publish(self.msg_to_send)
 
-    def _on_counter_val_to_get_changed(self, id):
+    def _on_counter_val_to_get_changed(self, msg):
+        input_str = re.sub("[^0-9]", "", str(msg))
+        self._widget.counter_val_to_get.setText(input_str)
+        print(input_str)
+        print(type(self._widget.counter_val_to_get))
         try:
-            self.counter_req_id = int(id)
+            self.counter_req_id = int(input_str)
         except ValueError:
-            print("String input is not an integer")
+            self._widget.counter_val_to_get.clear()
+            print(f'String input "{input_str}" is not an integer')
 
-    # def _on_send_request_pressed(self):
-    #     rospy.wait_for_service('message_counter')
-    #     try:
-    #         counter_serv = rospy.ServiceProxy('message_counter',counter)
-    #         response = counter_serv(self.counter_req_id)
-    #         self.message_count_display(response)
-    #         return response
-    #     except rospy.ServiceException, ex:
-    #         print "Service call to get message counter failed. %s"%e
+    def _on_send_request_pressed(self):
+        try:
+            request = Counter.Request()
+            request.req_id = self.counter_req_id
+            response = self.counter_client.call(request)
+            self.message_count_display(response).reply
+            return response
+        except Exception as e:
+            print("Service call to get message counter failed: {e}")
 
     def shutdown_plugin(self):
         pass

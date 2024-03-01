@@ -17,6 +17,7 @@ namespace mrsd
   public:
     Subscription<ReplyMsg>::SharedPtr reply_msg_sub;
     Subscription<SentMsg>::SharedPtr sent_msg_sub;
+    Service<Counter>::SharedPtr counter_service;
     CounterNode() : Node("counter_node")
     {
       num_sent_msg = 0;
@@ -24,7 +25,7 @@ namespace mrsd
       reply_msg_sub = this->create_subscription<ReplyMsg>("reply_msg", 10, std::bind(&CounterNode::replyMsgCb, this, _1));
       sent_msg_sub = this->create_subscription<SentMsg>("sent_msg", 10, std::bind(&CounterNode::sentMsgCb, this, _1));
 
-      Service<Counter>::SharedPtr counter_service = this->create_service<Counter>("message_counter", std::bind(&CounterNode::counterServiceCb, this, _1, _2));
+      counter_service = this->create_service<Counter>("message_counter", std::bind(&CounterNode::counterServiceCb, this, _1, _2));
     }
 
     ~CounterNode() {}
@@ -45,6 +46,15 @@ namespace mrsd
       last_sent_msg_time = msg.header.stamp;
     }
 
+    float getElapsedTime(rclcpp::Time time)
+    {
+      rclcpp::Time now = this->get_clock()->now();
+      float now_sec = now.seconds() + now.nanoseconds() * 1e9;
+      float then_sec = time.seconds() + time.nanoseconds() * 1e9;
+
+      return now_sec - then_sec;
+    }
+
     void counterServiceCb(const Counter::Request::SharedPtr request,
                           Counter::Response::SharedPtr response)
     {
@@ -54,16 +64,27 @@ namespace mrsd
       {
       case 0:
         RCLCPP_INFO(get_logger(), "Total message count");
+        response->reply = num_sent_msg + num_reply_msg;
         break;
       case 1:
         RCLCPP_INFO(get_logger(), "Total replied messages");
+        response->reply = num_reply_msg;
+
         break;
       case 2:
         RCLCPP_INFO(get_logger(), "Total sent messages");
+        response->reply = num_sent_msg;
+        break;
       case 3:
         RCLCPP_INFO(get_logger(), "Time since last reply");
+        response->reply = getElapsedTime(last_reply_msg_time);
+        break;
+
       case 4:
         RCLCPP_INFO(get_logger(), "Time since last user message");
+        response->reply = getElapsedTime(last_sent_msg_time);
+        break;
+
       default:
         RCLCPP_ERROR(get_logger(), "Invalid req_id!");
       }
