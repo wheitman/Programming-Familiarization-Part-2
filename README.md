@@ -1,9 +1,12 @@
 # MRSD Programming Familiarization, Pt. 2
+
 ![Screenshot of functionality](screenshot.png)
 
 ## Dependencies
 
 - [ROS2 Humble](https://docs.ros.org/en/humble/Installation/Ubuntu-Install-Debians.html) (likely works OK with other versions)
+
+  - No ROS2? For the lazy, try `$ docker run -it -v $(pwd):/ws ros:foxy /bin/bash`
 
 - Various ROS2 packages. From the repo root, try running:
 
