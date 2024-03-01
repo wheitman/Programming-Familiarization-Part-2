@@ -115,9 +115,9 @@ class MessageUI(Plugin):
         self._widget.send_message.pressed.connect(self._on_send_message_pressed)
         # self._widget.send_request.pressed.connect(self._on_send_request_pressed)
         self.spin_node()
-        # rclpy.spin_once(self.node)
 
     def spin_node(self):
+        """We have to spin the node manually, since the Plugin does not do this for us."""
         threading.Timer(0.1, self.spin_node).start()
         rclpy.spin_once(self.node, timeout_sec=0.05)
 
