@@ -5,6 +5,8 @@
 #include <string>
 
 using namespace std;
+using namespace mrsd_msgs::msg;
+using std::placeholders::_1;
 
 namespace mrsd
 {
@@ -14,10 +16,26 @@ namespace mrsd
     ChatbotNode() : Node("chatbot_node")
     {
       // Put your publishers, subscribers, etc. here
+      reply_msg_pub = create_publisher<ReplyMsg>("reply_msg", 10);
+      sent_msg_sub = create_subscription<SentMsg>("sent_msg", 10, std::bind(&ChatbotNode::sentMsgCb, this, _1));
     }
 
     ~ChatbotNode() {}
+
+  private:
+    rclcpp::Publisher<ReplyMsg>::SharedPtr reply_msg_pub;
+    rclcpp::Subscription<SentMsg>::SharedPtr sent_msg_sub;
+
+    void sentMsgCb(const SentMsg::SharedPtr msg) const
+    {
+      RCLCPP_INFO(get_logger(), msg->message.c_str());
+
+      ReplyMsg reply_msg;
+      reply_msg.message = msg->message;
+      reply_msg_pub->publish(reply_msg);
+    }
   };
+
 }
 
 int main(int argc, char *argv[])
