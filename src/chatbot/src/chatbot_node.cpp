@@ -32,9 +32,9 @@ namespace mrsd
     rclcpp::Publisher<ReplyMsg>::SharedPtr reply_msg_pub;
     rclcpp::Subscription<SentMsg>::SharedPtr sent_msg_sub;
 
-    void sentMsgCb(const SentMsg::SharedPtr msg) const
+    void sentMsgCb(const SentMsg::SharedPtr msg)
     {
-      RCLCPP_INFO(get_logger(), msg->message.c_str());
+      RCLCPP_INFO(get_logger(), ("Q: " + msg->message).c_str());
 
       string processed_string = msg->message;
       ReplyMsg reply_msg;
@@ -49,24 +49,40 @@ namespace mrsd
           [](unsigned char c)
           { return std::tolower(c); });
 
-      if (processed_string == "hello")
+      if (
+          processed_string == "hello" ||
+          processed_string == "hey" ||
+          processed_string == "hiya" ||
+          processed_string == "heythere" ||
+          processed_string == "hi" ||
+          processed_string == "yo")
       {
         reply_msg.message = "Hello, " + name;
       }
-      else if (processed_string == "whatisyourname")
+      else if (
+          processed_string == "whatisyourname" ||
+          processed_string == "whatsyourname" ||
+          processed_string == "whoareyou")
       {
         reply_msg.message = "My name is MRSD Siri.";
       }
-      else if (processed_string == "howareyou")
+      else if (
+          processed_string == "howareyou" ||
+          processed_string == "howsitgoing" ||
+          processed_string == "whatsup" ||
+          processed_string == "wassup")
       {
         reply_msg.message = "Feeling great with ROS2!";
       }
       else
       {
-        reply_msg.message = "Hmm, I don't understand. I heard: " + processed_string;
+        RCLCPP_INFO(get_logger(), ("Message not understood. Ignoring." + reply_msg.message).c_str());
+        return;
       }
 
-      // reply_msg.message = msg->message;
+      RCLCPP_INFO(get_logger(), ("A: " + reply_msg.message).c_str());
+
+      reply_msg.header.stamp = get_clock()->now();
       reply_msg_pub->publish(reply_msg);
     }
   };

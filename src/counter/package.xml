@@ -45,7 +45,6 @@
   <depend>rclcpp</depend>
   <depend>std_msgs</depend>
   <depend>mrsd_msgs</depend>
-  <depend>message_generation</depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->

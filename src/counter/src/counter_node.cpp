@@ -2,6 +2,7 @@
 
 #include "mrsd_msgs/msg/reply_msg.hpp"
 #include "mrsd_msgs/msg/sent_msg.hpp"
+#include "mrsd_msgs/msg/arithmetic_reply.hpp"
 #include "mrsd_msgs/srv/counter.hpp"
 
 using namespace rclcpp;
@@ -17,6 +18,7 @@ namespace mrsd
   public:
     Subscription<ReplyMsg>::SharedPtr reply_msg_sub;
     Subscription<SentMsg>::SharedPtr sent_msg_sub;
+    Subscription<ArithmeticReply>::SharedPtr arithmetic_reply_sub;
     Service<Counter>::SharedPtr counter_service;
     CounterNode() : Node("counter_node")
     {
@@ -24,6 +26,7 @@ namespace mrsd
       num_reply_msg = 0;
       reply_msg_sub = this->create_subscription<ReplyMsg>("reply_msg", 10, std::bind(&CounterNode::replyMsgCb, this, _1));
       sent_msg_sub = this->create_subscription<SentMsg>("sent_msg", 10, std::bind(&CounterNode::sentMsgCb, this, _1));
+      arithmetic_reply_sub = this->create_subscription<ArithmeticReply>("arithmetic_reply", 10, std::bind(&CounterNode::arithmeticReplyCb, this, _1));
 
       counter_service = this->create_service<Counter>("message_counter", std::bind(&CounterNode::counterServiceCb, this, _1, _2));
     }
@@ -44,6 +47,11 @@ namespace mrsd
     {
       num_sent_msg++;
       last_sent_msg_time = msg.header.stamp;
+    }
+    void arithmeticReplyCb(const ArithmeticReply msg)
+    {
+      num_reply_msg++;
+      last_reply_msg_time = msg.header.stamp;
     }
 
     float getElapsedTime(rclcpp::Time time)
