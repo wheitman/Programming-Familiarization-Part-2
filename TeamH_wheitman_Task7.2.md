@@ -10,7 +10,7 @@ Services are alternatives to publishers that are suitable for on-demand calculat
 
 ### 3.
 
-It was helpful (as long as it's in ROS2 **😃**). It would be more helpful if at least one of the packages was written in Python. Many developers are overly snobby toward Python, but the reality is that it's much faster to develop with, and it's nearly always good enough.
+It was helpful (as long as it's in ROS2 (ღˇ◡ˇ)~♥). It would be more helpful if at least one of the packages was written in Python. Many developers are overly snobby toward Python, but the reality is that it's much faster to develop with, and it's nearly always good enough.
 
 ### 4.
 
