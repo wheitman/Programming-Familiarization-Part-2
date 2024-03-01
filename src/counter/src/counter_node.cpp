@@ -49,9 +49,8 @@ namespace mrsd
     float getElapsedTime(rclcpp::Time time)
     {
       rclcpp::Time now = this->get_clock()->now();
-      float now_sec = now.seconds() + now.nanoseconds() * 1e9;
-      float then_sec = time.seconds() + time.nanoseconds() * 1e9;
-
+      double now_sec = now.seconds();
+      double then_sec = time.seconds();
       return now_sec - then_sec;
     }
 

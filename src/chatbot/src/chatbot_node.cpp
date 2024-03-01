@@ -41,7 +41,7 @@ namespace mrsd
       string name = get_parameter("name").as_string();
 
       // Keep only letters and spaces
-      processed_string = regex_replace(processed_string, regex("[^A-Za-z ]+"), "");
+      processed_string = regex_replace(processed_string, regex("[^A-Za-z]+"), "");
 
       // Convert to lowercase
       std::transform(
@@ -49,15 +49,15 @@ namespace mrsd
           [](unsigned char c)
           { return std::tolower(c); });
 
-      if (msg->message == "hello")
+      if (processed_string == "hello")
       {
         reply_msg.message = "Hello, " + name;
       }
-      else if (msg->message == "what is your name")
+      else if (processed_string == "whatisyourname")
       {
         reply_msg.message = "My name is MRSD Siri.";
       }
-      else if (msg->message == "how are you")
+      else if (processed_string == "howareyou")
       {
         reply_msg.message = "Feeling great with ROS2!";
       }
